@@ -19,7 +19,32 @@ namespace HotelBookingStartupProject.BusinessLogic
 
         public bool CreateBooking(Booking booking)
         {
-            return true;
+            int roomId = -1;
+            var startDate = booking.StartDate;
+            var endDate = booking.EndDate;
+
+
+            var activeBookings = bookingRepository.GetAll().Where(b => b.IsActive);
+            foreach (var room in roomRepository.GetAll())
+            {
+                var activeBookingsForCurrentRoom = activeBookings.Where(b => b.RoomId == room.Id);
+                if (activeBookingsForCurrentRoom.All(b => startDate < b.StartDate &&
+                    endDate <= b.StartDate || startDate >= b.EndDate && endDate > b.EndDate))
+                {
+                    roomId = room.Id;
+                    break;
+                }
+            }
+
+            if (roomId >= 0)
+            {
+                booking.RoomId = roomId;
+                booking.IsActive = true;
+                bookingRepository.Add(booking);
+                return true;
+            }
+            return false;
+
         }
 
         public int FindAvailableRoom(DateTime startDate, DateTime endDate)
@@ -28,8 +53,11 @@ namespace HotelBookingStartupProject.BusinessLogic
                 return -1;
             if(startDate.CompareTo(endDate) > 0)
                 return -1;
-            
+            if (startDate.Ticks == int.MaxValue || endDate.Ticks == int.MaxValue)
+                return -1;
+
             return 1;
+
         }
 
         public List<DateTime> GetFullyOccupiedDates(DateTime startDate, DateTime endDate)
@@ -57,6 +85,7 @@ namespace HotelBookingStartupProject.BusinessLogic
                 }
 
             }
+            occupiedDates.Sort((x, y) => x.Date.CompareTo(y.Date));
 
             return occupiedDates;
         }

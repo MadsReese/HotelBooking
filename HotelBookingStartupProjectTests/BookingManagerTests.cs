@@ -15,27 +15,13 @@ namespace HotelBookingStartupProjectTests
     [TestFixture]
     public class BookingManagerTests
     {
-        [Test]
-        public void CreateBooking_AddValidBooking_ReturnsTrue()
-        {
-            //Arrange
-            IBookingManager b = CreateFakeBookingManager();
-            bool expected = true;
-
-            Booking foo = new Booking();
-
-            //Act
-            bool actual = b.CreateBooking(foo);
-
-            //Assert
-            Assert.AreEqual(expected, actual);
-        }
+        
 
         [Test]
         public void FindAvailableRoom_NoDate_ReturnNeg1()
         {
             //Arrange
-            IBookingManager b = CreateFakeBookingManager();
+            var b = CreateFakeBookingManager();
 
             var startDate = new DateTime();
             var endDate = new DateTime();
@@ -54,7 +40,7 @@ namespace HotelBookingStartupProjectTests
         public void FindAvailableRoom_ValidDate_Return1()
         {
             //Arrange
-            IBookingManager b = CreateFakeBookingManager();
+            var b = CreateFakeBookingManager();
 
             var startDate = new DateTime(2017, 09, 14);
             var endDate = new DateTime(2017, 09, 17);
@@ -116,7 +102,26 @@ namespace HotelBookingStartupProjectTests
             Assert.IsNotEmpty(listOfDates);
         }
 
-        private BookingManager CreateFakeBookingManager()
+        [Test]
+        public void CreateBooking_ListOfDates_ReturnsListOfBools([ValueSource("_testDates")] TestData testData)
+        {
+            //arrange
+            var b = CreateFakeBookingManager();
+            bool expexted = testData.ExpectedResult;
+
+            DateTime startDate = testData.StartDate;
+            DateTime endDate = testData.EndDate;
+
+            Booking booking = new Booking { StartDate = startDate, EndDate = endDate };
+
+            //Act
+            bool actual = b.CreateBooking(booking);
+
+            //Assert
+            Assert.AreEqual(expexted, actual);
+        }
+
+        private IBookingManager CreateFakeBookingManager()
         {
             IRepository<Booking> fakeBookingrepo = Substitute.For<IRepository<Booking>>();
             IRepository<Room> fakeRoomrepo = Substitute.For<IRepository<Room>>();
@@ -124,7 +129,7 @@ namespace HotelBookingStartupProjectTests
 			fakeRoomrepo.GetAll().Returns(GenerateFakeRooms());
             fakeBookingrepo.GetAll().Returns(GenerateFakeBookings());
 
-            BookingManager b = new BookingManager(fakeBookingrepo, fakeRoomrepo);
+            IBookingManager b = new BookingManager(fakeBookingrepo, fakeRoomrepo);
 
             return b;
         }
@@ -152,5 +157,37 @@ namespace HotelBookingStartupProjectTests
 			};
 			return rooms;
         }
+
+        public static DateTime _today()
+        {
+            var today = new DateTime();
+            today = DateTime.Today;
+            return today;
+        }
+
+        private static TestData[] _testDates = new[]{
+            new TestData(){StartDate = _today().AddDays(1), EndDate = _today().AddDays(7), ExpectedResult = true},
+            new TestData(){StartDate = _today().AddDays(1), EndDate = _today().AddDays(8), ExpectedResult = false},
+            new TestData(){StartDate = _today().AddDays(1), EndDate = _today().AddDays(13), ExpectedResult = false},
+            new TestData(){StartDate = _today().AddDays(1), EndDate = _today().AddDays(14), ExpectedResult = false},
+            new TestData(){StartDate = _today().AddDays(1), EndDate = _today().AddDays(200), ExpectedResult = false},
+            new TestData(){StartDate = _today().AddDays(14), EndDate = _today().AddDays(200), ExpectedResult = true},
+            new TestData(){StartDate = _today().AddDays(15), EndDate = _today().AddDays(200), ExpectedResult = true},
+            new TestData(){StartDate = _today().AddDays(13), EndDate = _today().AddDays(200), ExpectedResult = false},
+            new TestData(){StartDate = _today().AddDays(7), EndDate = _today().AddDays(8), ExpectedResult = false},
+            new TestData(){StartDate = _today().AddDays(7), EndDate = _today().AddDays(14), ExpectedResult = false},
+            new TestData(){StartDate = _today().AddDays(7), EndDate = _today().AddDays(200), ExpectedResult = false},
+            new TestData(){StartDate = _today(), EndDate = _today().AddDays(7), ExpectedResult = false},
+            new TestData(){StartDate = _today(), EndDate = _today().AddDays(8), ExpectedResult = false},
+            new TestData(){StartDate = _today(), EndDate = _today().AddDays(14), ExpectedResult = false},
+            new TestData(){StartDate = _today(), EndDate = _today().AddDays(15), ExpectedResult = false}
+        };
+        }
+
+        public class TestData
+        {
+            public DateTime StartDate { get; set; }
+            public DateTime EndDate { get; set; }
+            public bool ExpectedResult { get; set; }
+        }
     }
-}
