@@ -23,6 +23,13 @@ namespace HotelBookingStartupProject.BusinessLogic
             var startDate = booking.StartDate;
             var endDate = booking.EndDate;
 
+            var today = new DateTime();
+            today = DateTime.Today;
+            if(startDate == today )
+            {
+                return false;
+            }
+
 
             var activeBookings = bookingRepository.GetAll().Where(b => b.IsActive);
             foreach (var room in roomRepository.GetAll())

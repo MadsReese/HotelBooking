@@ -139,9 +139,9 @@ namespace HotelBookingStartupProjectTests
 			DateTime date = DateTime.Today;
 			List<Booking> bookings = new List<Booking>
 			{
-				new Booking { StartDate=date, EndDate=date.AddDays(14), IsActive=true, CustomerId=1, RoomId=1 },
-				new Booking { StartDate=date, EndDate=date.AddDays(14), IsActive=true, CustomerId=2, RoomId=2 },
-				new Booking { StartDate=date, EndDate=date.AddDays(14), IsActive=true, CustomerId=1, RoomId=3 },
+				new Booking { StartDate=date.AddDays(7), EndDate=date.AddDays(14), IsActive=true, CustomerId=1, RoomId=1 },
+				new Booking { StartDate=date.AddDays(7), EndDate=date.AddDays(14), IsActive=true, CustomerId=2, RoomId=2 },
+				new Booking { StartDate=date.AddDays(7), EndDate=date.AddDays(14), IsActive=true, CustomerId=1, RoomId=3 },
 			};
 
 			return bookings;
@@ -189,5 +189,7 @@ namespace HotelBookingStartupProjectTests
             public DateTime StartDate { get; set; }
             public DateTime EndDate { get; set; }
             public bool ExpectedResult { get; set; }
+
+
         }
     }
